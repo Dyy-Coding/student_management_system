@@ -1,0 +1,90 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary">Assign Subject to Teacher</h2>
+    <a href="{{ url_for('subjects.subject_list') }}" class="btn btn-secondary">← Back to Subjects</a>
+  </div>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Assign Form -->
+  <form action="{{ url_for('subjects.assign_teacher') }}" method="POST" class="card p-4 shadow-sm mb-4">
+    <h5 class="fw-bold mb-3">Assign Subject</h5>
+    <div class="row g-3">
+      <div class="col-md-5">
+        <label for="subject_id" class="form-label">Select Subject</label>
+        <select name="subject_id" id="subject_id" class="form-select" required>
+          <option value="">-- Choose Subject --</option>
+          {% for s in subjects %}
+          <option value="{{ s.id }}">{{ s.subject_name }} ({{ s.class_name }})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-5">
+        <label for="teacher_id" class="form-label">Select Teacher</label>
+        <select name="teacher_id" id="teacher_id" class="form-select" required>
+          <option value="">-- Choose Teacher --</option>
+          {% for t in teachers %}
+          <option value="{{ t.id }}">{{ t.username }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-success w-100">Assign</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Current Assignments Table -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white fw-semibold">
+      Current Subject Assignments
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-hover table-bordered mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Subject</th>
+            <th>Class</th>
+            <th>Assigned Teacher</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in subjects %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ s.subject_name }}</td>
+            <td>{{ s.class_name }}</td>
+            <td>
+              {% if s.teacher_name %}
+                <span class="badge bg-success">{{ s.teacher_name }}</span>
+              {% else %}
+                <span class="badge bg-secondary">Not Assigned</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" class="text-center text-muted py-3">No subjects available.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
