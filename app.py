@@ -57,12 +57,12 @@ def home():
 @app.errorhandler(404)
 def not_found(e):
     """Custom 404 page."""
-    return render_template('404.html'), 404
+    return render_template('errors/404.html'), 404
 
 @app.errorhandler(500)
 def internal_error(e):
     """Custom 500 page."""
-    return render_template('500.html'), 500
+    return render_template('errors/500.html'), 500
 
 # ==============================================================
 # 🔹 Run Application

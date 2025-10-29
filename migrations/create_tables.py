@@ -1,7 +1,7 @@
 # ==============================================================
 # FILE: migrations/create_tables.py
 # PURPOSE: Create all database tables for Student Management System
-# AUTHOR: Chandy Neat
+# AUTHOR: Chandy Neat (updated by Trinh Dinh Nhat & ChatGPT)
 # ==============================================================
 
 import os
@@ -41,6 +41,7 @@ def create_tables():
                     audit_logs,
                     grades,
                     attendance,
+                    subject_teacher,
                     subjects,
                     students,
                     classes,
@@ -62,6 +63,7 @@ def create_tables():
                 email VARCHAR(150) NOT NULL UNIQUE,
                 password_hash VARCHAR(255) NOT NULL,
                 role ENUM('admin', 'teacher') NOT NULL,
+                image VARCHAR(255),
                 status ENUM('active', 'inactive') DEFAULT 'active',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -76,6 +78,7 @@ def create_tables():
                 email VARCHAR(150) UNIQUE,
                 contact VARCHAR(20),
                 specialization VARCHAR(150),
+                image VARCHAR(255),
                 status ENUM('active', 'inactive') DEFAULT 'active',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id)
@@ -107,6 +110,7 @@ def create_tables():
                 email VARCHAR(150) UNIQUE,
                 contact VARCHAR(20),
                 address TEXT,
+                image VARCHAR(255),
                 class_id INT,
                 status ENUM('active', 'inactive') DEFAULT 'active',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -121,10 +125,28 @@ def create_tables():
             CREATE TABLE subjects (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(150) NOT NULL,
+                image VARCHAR(255),
                 class_id INT,
                 FOREIGN KEY (class_id) REFERENCES classes(id)
                     ON UPDATE CASCADE
                     ON DELETE CASCADE
+            );
+            """)
+
+            # --- SUBJECT_TEACHER ---
+            cursor.execute("""
+            CREATE TABLE subject_teacher (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                subject_id INT NOT NULL,
+                teacher_id INT NOT NULL,
+                assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (subject_id) REFERENCES subjects(id)
+                    ON UPDATE CASCADE
+                    ON DELETE CASCADE,
+                FOREIGN KEY (teacher_id) REFERENCES teachers(id)
+                    ON UPDATE CASCADE
+                    ON DELETE CASCADE,
+                UNIQUE KEY unique_assignment (subject_id, teacher_id)
             );
             """)
 
@@ -145,7 +167,7 @@ def create_tables():
             );
             """)
 
-          # --- GRADES TABLE ---
+            # --- GRADES ---
             cursor.execute("""
             CREATE TABLE grades (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -191,7 +213,7 @@ def create_tables():
             # ✅ COMMIT CHANGES
             # ==================================================
             conn.commit()
-            print("🎉 All tables created successfully!")
+            print("🎉 All tables created successfully with updated constraints!")
 
     except Error as e:
         print(f"❌ MySQL Error: {e}")

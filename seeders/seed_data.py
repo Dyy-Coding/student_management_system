@@ -20,6 +20,7 @@ def seed_data():
     # ------------------------------------------------
     cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
     tables = [
+        'subject_teacher',
         'audit_logs',
         'grades',
         'attendance',
@@ -34,14 +35,14 @@ def seed_data():
     cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
 
     # ------------------------------------------------
-    # 🔹 Step 2: Insert users
+    # 🔹 Step 2: Insert users (added image)
     # ------------------------------------------------
     cursor.execute("""
-    INSERT INTO users (username, email, password_hash, role, status)
+    INSERT INTO users (username, email, password_hash, role, image, status)
     VALUES
-    ('admin', 'admin@example.com', '$pbkdf2:sha256:600000$admin$1234567890abcdef', 'admin', 'active'),
-    ('teacher1', 'teacher1@example.com', '$pbkdf2:sha256:600000$teacher1$abcdef1234567890', 'teacher', 'active'),
-    ('teacher2', 'teacher2@example.com', '$pbkdf2:sha256:600000$teacher2$fedcba0987654321', 'teacher', 'active');
+    ('admin', 'admin@example.com', '$pbkdf2:sha256:600000$admin$1234567890abcdef', 'admin', 'images/users/admin.jpg', 'active'),
+    ('teacher1', 'teacher1@example.com', '$pbkdf2:sha256:600000$teacher1$abcdef1234567890', 'teacher', 'images/users/teacher1.jpg', 'active'),
+    ('teacher2', 'teacher2@example.com', '$pbkdf2:sha256:600000$teacher2$fedcba0987654321', 'teacher', 'images/users/teacher2.jpg', 'active');
     """)
 
     # Get user IDs dynamically
@@ -49,17 +50,16 @@ def seed_data():
     user_map = {name: uid for uid, name in cursor.fetchall()}
 
     # ------------------------------------------------
-    # 🔹 Step 3: Insert teachers linked to users
+    # 🔹 Step 3: Insert teachers (added image)
     # ------------------------------------------------
     cursor.executemany("""
-    INSERT INTO teachers (user_id, name, email, contact, specialization, status)
-    VALUES (%s, %s, %s, %s, %s, %s)
+    INSERT INTO teachers (user_id, name, email, contact, specialization, image, status)
+    VALUES (%s, %s, %s, %s, %s, %s, %s)
     """, [
-        (user_map['teacher1'], 'Mr. Dara', 'teacher1@example.com', '0123456789', 'Mathematics', 'active'),
-        (user_map['teacher2'], 'Ms. Lina', 'teacher2@example.com', '0987654321', 'Science', 'active'),
+        (user_map['teacher1'], 'Mr. Dara', 'teacher1@example.com', '0123456789', 'Mathematics', 'images/teachers/dara.jpg', 'active'),
+        (user_map['teacher2'], 'Ms. Lina', 'teacher2@example.com', '0987654321', 'Science', 'images/teachers/lina.jpg', 'active'),
     ])
 
-    # Get teacher IDs dynamically
     cursor.execute("SELECT id, name FROM teachers")
     teacher_map = {name: tid for tid, name in cursor.fetchall()}
 
@@ -74,7 +74,6 @@ def seed_data():
         ('Class B', 2025, teacher_map['Ms. Lina']),
     ])
 
-    # Get class IDs dynamically
     cursor.execute("SELECT id, name FROM classes")
     class_map = {name: cid for cid, name in cursor.fetchall()}
 
@@ -82,16 +81,15 @@ def seed_data():
     # 🔹 Step 5: Insert students
     # ------------------------------------------------
     cursor.executemany("""
-    INSERT INTO students (name, gender, dob, email, contact, address, class_id, status)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    INSERT INTO students (name, gender, dob, email, contact, address, image, class_id, status)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, [
-        ('John Doe', 'Male', '2008-03-12', 'john.doe@studentmail.com', '0123456789', 'Phnom Penh', class_map['Class A'], 'active'),
-        ('Lisa Chan', 'Female', '2008-06-25', 'lisa.chan@studentmail.com', '0987654321', 'Siem Reap', class_map['Class A'], 'active'),
-        ('Mark Lim', 'Male', '2009-01-15', 'mark.lim@studentmail.com', '011223344', 'Battambang', class_map['Class B'], 'active'),
-        ('Sophy Eng', 'Female', '2009-04-10', 'sophy.eng@studentmail.com', '099887766', 'Kampot', class_map['Class B'], 'active'),
+        ('John Doe', 'Male', '2008-03-12', 'john.doe@studentmail.com', '0123456789', 'Phnom Penh', 'images/students/john.jpg', class_map['Class A'], 'active'),
+        ('Lisa Chan', 'Female', '2008-06-25', 'lisa.chan@studentmail.com', '0987654321', 'Siem Reap', 'images/students/lisa.jpg', class_map['Class A'], 'active'),
+        ('Mark Lim', 'Male', '2009-01-15', 'mark.lim@studentmail.com', '011223344', 'Battambang', 'images/students/mark.jpg', class_map['Class B'], 'active'),
+        ('Sophy Eng', 'Female', '2009-04-10', 'sophy.eng@studentmail.com', '099887766', 'Kampot', 'images/students/sophy.jpg', class_map['Class B'], 'active'),
     ])
 
-    # Get student IDs
     cursor.execute("SELECT id, name FROM students")
     student_map = {name: sid for sid, name in cursor.fetchall()}
 
@@ -99,20 +97,33 @@ def seed_data():
     # 🔹 Step 6: Insert subjects
     # ------------------------------------------------
     cursor.executemany("""
-    INSERT INTO subjects (name, class_id)
-    VALUES (%s, %s)
+    INSERT INTO subjects (name, image, class_id)
+    VALUES (%s, %s, %s)
     """, [
-        ('Mathematics', class_map['Class A']),
-        ('Science', class_map['Class A']),
-        ('English', class_map['Class B']),
-        ('History', class_map['Class B']),
+        ('Mathematics', 'images/subjects/math.png', class_map['Class A']),
+        ('Science', 'images/subjects/science.png', class_map['Class A']),
+        ('English', 'images/subjects/english.png', class_map['Class B']),
+        ('History', 'images/subjects/history.png', class_map['Class B']),
     ])
 
     cursor.execute("SELECT id, name FROM subjects")
     subject_map = {name: sid for sid, name in cursor.fetchall()}
 
     # ------------------------------------------------
-    # 🔹 Step 7: Insert attendance
+    # 🔹 Step 7: Assign teachers to subjects
+    # ------------------------------------------------
+    cursor.executemany("""
+    INSERT INTO subject_teacher (subject_id, teacher_id)
+    VALUES (%s, %s)
+    """, [
+        (subject_map['Mathematics'], teacher_map['Mr. Dara']),
+        (subject_map['Science'], teacher_map['Ms. Lina']),
+        (subject_map['English'], teacher_map['Mr. Dara']),
+        (subject_map['History'], teacher_map['Ms. Lina']),
+    ])
+
+    # ------------------------------------------------
+    # 🔹 Step 8: Insert attendance
     # ------------------------------------------------
     cursor.executemany("""
     INSERT INTO attendance (student_id, class_id, date, status)
@@ -125,7 +136,7 @@ def seed_data():
     ])
 
     # ------------------------------------------------
-    # 🔹 Step 8: Insert grades (updated structure)
+    # 🔹 Step 9: Insert grades
     # ------------------------------------------------
     cursor.executemany("""
     INSERT INTO grades (student_id, subject_id, class_id, teacher_id, term, score, grade_letter, remarks)
@@ -139,7 +150,7 @@ def seed_data():
     ])
 
     # ------------------------------------------------
-    # 🔹 Step 9: Insert audit logs (no FK error now)
+    # 🔹 Step 10: Insert audit logs
     # ------------------------------------------------
     cursor.executemany("""
     INSERT INTO audit_logs (user_id, action)
@@ -156,7 +167,7 @@ def seed_data():
     conn.commit()
     cursor.close()
     conn.close()
-    print("✅ All data seeded successfully!")
+    print("✅ All data seeded successfully with image paths and subject-teacher assignments!")
 
 if __name__ == "__main__":
     seed_data()

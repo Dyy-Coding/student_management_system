@@ -45,7 +45,7 @@ def login():
 
         if not username or not password:
             flash("Please enter both username and password", "warning")
-            return render_template('login.html')
+            return render_template('auth/login.html')
 
         db = get_db()
         cursor = db.cursor(dictionary=True)
@@ -80,7 +80,7 @@ def login():
         else:
             flash("User not found", "danger")
 
-    return render_template('login.html')
+    return render_template('auth/login.html')
 
 # ---------------- Logout ----------------
 @auth_bp.route('/logout')
@@ -97,8 +97,84 @@ def logout():
 def view_profile():
     """Display current user profile"""
     user = UserModel.get_user_by_id(session['user_id'])
-    return render_template('profile.html', user=user)
+    return render_template('users/profile.html', user=user)
 
+
+# ---------------- Update Own Profile ----------------
+@auth_bp.route('/update_profile', methods=['POST'])
+@login_required
+def update_profile():
+    """Allow the logged-in user to update their username and email"""
+    user_id = session['user_id']
+    username = request.form.get('username')
+    email = request.form.get('email')
+
+    if not username or not email:
+        flash("⚠️ Username and Email cannot be empty.", "warning")
+        return redirect(url_for('auth.view_profile'))
+
+    UserModel.update_user(user_id, username=username, email=email)
+    session['username'] = username  # Update session for display
+    flash("✅ Profile updated successfully!", "success")
+    return redirect(url_for('auth.view_profile'))
+
+
+# ---------------- Update Profile Image ----------------
+@auth_bp.route('/update_profile_image', methods=['POST'])
+@login_required
+def update_profile_image():
+    """Update the logged-in user's profile picture"""
+    user_id = session['user_id']
+    file = request.files.get('profile_image')
+
+    if not file:
+        flash("⚠️ No file selected.", "warning")
+        return redirect(url_for('auth.view_profile'))
+
+    # Save the file
+    import os
+    from werkzeug.utils import secure_filename
+
+    filename = secure_filename(file.filename)
+    upload_path = os.path.join('static', 'uploads', filename)
+    file.save(upload_path)
+
+    # Update database
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("UPDATE users SET profile_image = %s WHERE id = %s", (f'/static/uploads/{filename}', user_id))
+    db.commit()
+    cursor.close()
+
+    flash("✅ Profile image updated successfully!", "success")
+    return redirect(url_for('auth.view_profile'))
+
+
+# ---------------- Change Password ----------------
+@auth_bp.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    """Allow user to change their password"""
+    if request.method == 'POST':
+        current = request.form.get('current_password')
+        new = request.form.get('new_password')
+        confirm = request.form.get('confirm_password')
+
+        user = UserModel.get_user_by_id(session['user_id'])
+
+        if not UserModel.verify_password(user['password_hash'], current):
+            flash("⚠️ Current password is incorrect.", "danger")
+            return redirect(url_for('auth.change_password'))
+
+        if new != confirm:
+            flash("⚠️ New passwords do not match.", "warning")
+            return redirect(url_for('auth.change_password'))
+
+        UserModel.change_password(session['user_id'], new)
+        flash("✅ Password changed successfully!", "success")
+        return redirect(url_for('auth.view_profile'))
+
+    return render_template('users/change_password.html')
 
 # ---------------- Update User ----------------
 @auth_bp.route('/update/<int:user_id>', methods=['GET', 'POST'])
@@ -129,7 +205,7 @@ def update_user(user_id):
         flash("✅ User updated successfully!", "success")
         return redirect(url_for('auth.manage_users'))
 
-    return render_template('update_user.html', user=user)
+    return render_template('users/update_user.html', user=user)
 
 
 # ---------------- Create User (Admin Only) ----------------
@@ -152,7 +228,7 @@ def create_user():
             flash("✅ User created successfully!", "success")
             return redirect(url_for('auth.manage_users'))
 
-    return render_template('create_user.html')
+    return render_template('users/create_user.html')
 
 
 # ---------------- Delete User (Admin Only) ----------------
@@ -178,4 +254,4 @@ def delete_user(user_id):
 def manage_users():
     """Admin view to manage all users"""
     users = UserModel.get_all_users(exclude_admin=False)
-    return render_template('manage_users.html', users=users)
+    return render_template('users/manage_users.html', users=users)

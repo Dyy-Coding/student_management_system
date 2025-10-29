@@ -51,7 +51,7 @@ class UserModel:
         finally:
             cursor.close()
 
-    # ✅ Alias for backward compatibility (fix your error)
+    # ✅ Alias for backward compatibility
     find_by_username = get_user_by_username
 
     @staticmethod
@@ -69,16 +69,19 @@ class UserModel:
     # 🧩 CREATE
     # ------------------------
     @staticmethod
-    def create_user(username, email, password, role="teacher", status="active"):
-        """Create a new user."""
+    def create_user(username, email, password, role="teacher", status="active", image=None):
+        """
+        Create a new user.
+        image: Optional path or URL of the user's image.
+        """
         db = get_db()
         cursor = db.cursor()
         try:
             hashed_password = generate_password_hash(password)
             cursor.execute("""
-                INSERT INTO users (username, email, password_hash, role, status)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (username, email, hashed_password, role, status))
+                INSERT INTO users (username, email, password_hash, role, status, image)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (username, email, hashed_password, role, status, image))
             db.commit()
             print(f"✅ User '{username}' created successfully.")
         except Error as e:
@@ -91,7 +94,7 @@ class UserModel:
     # ✏️ UPDATE
     # ------------------------
     @staticmethod
-    def update_user(user_id, username=None, email=None, password=None, role=None, status=None):
+    def update_user(user_id, username=None, email=None, password=None, role=None, status=None, image=None):
         """
         Update user details.
         Only updates fields provided (non-None values).
@@ -117,6 +120,9 @@ class UserModel:
             if status:
                 updates.append("status = %s")
                 params.append(status)
+            if image:
+                updates.append("image = %s")
+                params.append(image)
 
             if not updates:
                 print("⚠️ No fields to update.")
