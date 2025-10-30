@@ -25,6 +25,7 @@ from routes.student_routes import student_bp
 from routes.attendance_routes import attendance_routes
 from routes.teacher_routes import teacher_routes
 from routes.grade_routes import grade_bp   # ✅ Added Grade Routes
+from routes.class_routes import classes_bp  # ✅ Added Grade Routes
 
 # Register all blueprints
 app.register_blueprint(auth_bp)
@@ -34,6 +35,7 @@ app.register_blueprint(student_bp)
 app.register_blueprint(attendance_routes)
 app.register_blueprint(teacher_routes)
 app.register_blueprint(grade_bp)  # ✅ Register new grade blueprint
+app.register_blueprint(classes_bp)  # ✅ Register new grade blueprint
 
 # ==============================================================
 # 🔹 Global Template Variables
