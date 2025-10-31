@@ -1,9 +1,33 @@
-from flask import Blueprint, render_template, session, redirect, url_for
+from flask import Blueprint, render_template, session, redirect, url_for,flash
 from models.db import get_db
+from functools import wraps
+
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
+# ---------------- Middleware: Require Login ----------------
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'user_id' not in session:
+            flash("Please log in to continue.", "warning")
+            return redirect(url_for('auth.login'))
+        return f(*args, **kwargs)
+    return decorated
+
+
+# ---------------- Middleware: Require Admin ----------------
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if session.get('role') != 'admin':
+            flash("You do not have permission to access this page.", "danger")
+            return redirect(url_for('dashboard.index'))
+        return f(*args, **kwargs)
+    return decorated
+
 @dashboard_bp.route('/')
+@admin_required
 def index():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))

