@@ -55,7 +55,7 @@ def login():
                 session['email'] = user['email']
                 session['role'] = user['role']
                 flash(f"Welcome back, Admin {user['email']}!", "success")
-                return redirect(url_for('dashboard.index'))
+                return redirect(url_for('dashboard.dashboard_home'))
 
             # Normal user: verify hashed password
             elif check_password_hash(user['password_hash'], password):
@@ -63,7 +63,7 @@ def login():
                 session['email'] = user['email']
                 session['role'] = user['role']
                 flash(f"Welcome back, {user['email']}!", "success")
-                return redirect(url_for('dashboard.index'))
+                return redirect(url_for('dashboard.dashboard_home'))
             else:
                 flash("Invalid email or password", "danger")
         else:

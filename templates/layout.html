@@ -142,7 +142,7 @@
 
     <nav class="nav flex-column">
       {% if session.get('role') == 'admin' %}
-        <a class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}" href="{{ url_for('dashboard.index') }}">Dashboard</a>
+        <a class="nav-link {% if request.endpoint == 'dashboard.dashboard_home' %}active{% endif %}" href="{{ url_for('dashboard.dashboard_home') }}">Dashboard</a>
         <a class="nav-link {% if request.endpoint == 'classes.manage_classes' %}active{% endif %}" href="{{ url_for('classes.manage_classes') }}">Classes</a>
         <a class="nav-link {% if request.endpoint == 'subjects.subject_list' %}active{% endif %}" href="{{ url_for('subjects.subject_list') }}">Subjects</a>
         <a class="nav-link {% if request.endpoint == 'student.list_students' %}active{% endif %}" href="{{ url_for('student.list_students') }}">Students</a>
@@ -151,14 +151,14 @@
         <a class="nav-link {% if request.endpoint == 'grade.list_grades' %}active{% endif %}" href="{{ url_for('grade.list_grades') }}">Grades</a>
 
       {% elif session.get('role') == 'teacher' %}
-        <a class="nav-link" href="{{ url_for('dashboard.index') }}">Dashboard</a>
+        <a class="nav-link" href="{{ url_for('dashboard.dashboard_home') }}">Dashboard</a>
         <a class="nav-link" href="{{ url_for('teacher_routes.teachers') }}">My Classes</a>
         <a class="nav-link" href="{{ url_for('teacher_routes.teachers') }}">My Subjects</a>
         <a class="nav-link" href="{{ url_for('attendance_routes.attendance') }}">Attendance</a>
         <a class="nav-link" href="{{ url_for('grade.list_grades') }}">Grades</a>
 
       {% elif session.get('role') == 'student' %}
-        <a class="nav-link" href="{{ url_for('dashboard.index') }}">Dashboard</a>
+        <a class="nav-link" href="{{ url_for('dashboard.dashboard_home') }}">Dashboard</a>
         <a class="nav-link" href="{{ url_for('classes.manage_classes') }}">My Class</a>
         <a class="nav-link" href="{{ url_for('subjects.subject_list') }}">My Subjects</a>
         <a class="nav-link" href="{{ url_for('grade.list_grades') }}">My Grades</a>
